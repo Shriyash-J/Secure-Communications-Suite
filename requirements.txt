@@ -1,0 +1,5 @@
+flask
+numpy
+cryptography
+pillow
+opencv-python
