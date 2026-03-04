@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECURE_SUITE // COMMAND_NODE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* --- CYBERPUNK THEME SETUP --- */
+        body { 
+            margin: 0; 
+            background-color: #020408; 
+            color: #e2e8f0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow-x: hidden;
+        }
+
+        /* The Canvas sits behind everything */
+        #canvas1 {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #0a101f 0%, #020408 100%);
+        }
+
+        /* Glassmorphism Cards */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.08);
+        }
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- THE INTERACTIVE BACKGROUND -->
+    <canvas id="canvas1"></canvas>
+
+    <!-- HEADER -->
+    <header class="p-8 border-b border-white/5 bg-black/20 backdrop-blur-sm">
+        <div class="container mx-auto flex justify-between items-end">
+            <div>
+                <h1 class="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">
+                    CYBER_SUITE
+                </h1>
+                <p class="text-cyan-500/60 font-mono text-xs mt-2 tracking-[0.3em]">SECURE OPERATIONS PLATFORM v4.5</p>
+            </div>
+            <div class="text-right font-mono text-xs text-slate-500 hidden md:block">
+                <div class="flex items-center justify-end gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    SYSTEM ONLINE
+                </div>
+                <div>SECURE CONNECTION: TLS 1.3</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GRID -->
+    <main class="container mx-auto p-10 flex-grow flex items-center justify-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+            
+            {% for key, project in projects.items() %}
+            <div class="glass-panel rounded-xl p-8 flex flex-col group relative overflow-hidden">
+                
+                <!-- Corner Markers -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                <div class="flex items-start justify-between mb-6">
+                    <div class="text-5xl filter drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        {{ project.icon }}
+                    </div>
+                    <div class="font-mono text-xs px-2 py-1 rounded bg-white/5 text-white/50 border border-white/10">
+                        Desktop App
+                    </div>
+                </div>
+                
+                <h2 class="text-2xl font-bold text-white mb-3 {{ project.color }} tracking-wide">
+                    {{ project.name }}
+                </h2>
+                
+                <p class="text-slate-400 text-sm leading-relaxed mb-8 flex-grow">
+                    {{ project.description }}
+                </p>
+
+                <a href="{{ url_for('launch', project_id=key) }}" 
+                   class="block w-full py-3 px-4 text-center rounded-lg bg-gradient-to-r from-cyan-900/50 to-blue-900/50 border border-cyan-500/30 text-cyan-300 font-bold tracking-wider hover:from-cyan-600 hover:to-blue-600 hover:text-white hover:border-transparent transition-all duration-300 shadow-lg">
+                    INITIALIZE
+                </a>
+            </div>
+            {% endfor %}
+
+        </div>
+    </main>
+
+    <footer class="p-6 text-center text-slate-700 text-xs font-mono border-t border-white/5">
+        ENCRYPTED ENVIRONMENT // UNAUTHORIZED ACCESS PROHIBITED
+    </footer>
+
+    <!-- THE PARTICLE SCRIPT -->
+    <script>
+        const canvas = document.getElementById('canvas1');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+
+        // Mouse interaction
+        let mouse = {
+            x: null,
+            y: null,
+            radius: 35
+        }
+
+        window.addEventListener('mousemove', 
+            function(event) {
+                mouse.x = event.x;
+                mouse.y = event.y;
+            }
+        );
+
+        // Create Particle
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+            // Method to draw individual particle
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = '#00F3FF'; // Cyan dots
+                ctx.fill();
+            }
+            // Check particle position, move particle, draw particle
+            update() {
+                // Check if particle is still within canvas
+                if (this.x > canvas.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+
+                // Check collision detection - mouse position / particle position
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                
+                if (distance < mouse.radius + this.size){
+                    // If close to mouse, push it away slightly (optional interaction)
+                    // or simplify: just draw line in connect()
+                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) {
+                        this.x += 2; // Push effect
+                    }
+                    if (mouse.x > this.x && this.x > this.size * 10) {
+                        this.x -= 2;
+                    }
+                }
+                
+                // Move particle
+                this.x += this.directionX;
+                this.y += this.directionY;
+                
+                // Draw particle
+                this.draw();
+            }
+        }
+
+        // Create particle array
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 6500; // Density
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 1.1) + 0.3;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 2) - 1; // Speed range
+                let directionY = (Math.random() * 2) - 1;
+                let color = '#00F3FF';
+
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        // Connect particles to each other and to mouse
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                    + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    // Link particles to each other
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance/15000);
+                        ctx.strokeStyle = 'rgba(0, 243, 255,' + opacityValue + ')'; // Cyan lines
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Link particles to MOUSE
+                let mouseDistance = ((particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x))
+                                  + ((particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y));
+                                  
+                if (mouseDistance < 20000) { // Connection range to mouse
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; // White lines to cursor
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        // Handle Resize
+        window.addEventListener('resize',
+            function() {
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                mouse.radius = ((canvas.height/80) * (canvas.height/80));
+                init();
+            }
+        );
+
+        // Mouse out event
+        window.addEventListener('mouseout',
+            function() {
+                mouse.x = undefined;
+                mouse.y = undefined;
+            }
+        )
+
+        init();
+        animate();
+
+    </script>
+</body>
+</html>

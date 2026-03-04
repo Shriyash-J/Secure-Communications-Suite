@@ -1,0 +1,2 @@
+# No external dependencies required for core logic.
+# Tkinter is required for the GUI (usually comes with Python).
